@@ -5,7 +5,9 @@ const NEWLINE_MARKER = "\n"
 // |meaning=
 const MEANING_PROPERTY_MARKER = / *\| *meaning *=/
 // [[category_link|text_content]]
-const CATEGORY_LINK_MATCHER = /\[\[(.*)\|(.*)\]\]/
+// The two last ]] have no escape character because IJ gives a warning.
+// I suppose not needed because the open ['s are escaped.
+const CATEGORY_LINK_MATCHER = /\[\[(.*)\|(.*)]]/
 /**
  * Removes square brackets [] when above fails due to there being no pipe.
  * This happens when the category name is the same as the text.
@@ -47,7 +49,7 @@ function fetchRadical(radicalNumber, radicalCharacter) {
 }
 
 function parseRadical(radicalNumber, radicalCharacter, json) {
-  const missing = json["query"]?.["pages"]?.[0]?.["missing"] == true
+  const missing = json["query"]?.["pages"]?.[0]?.["missing"] === true
   const content = json["query"]?.["pages"]?.[0]?.["revisions"]?.[0]?.["slots"]?.["main"]?.["content"]
 
   if (missing || !content) {
