@@ -1,10 +1,20 @@
 const API_BASE = "https://en.wikipedia.org/w/api.php"
 const START_CODE = parseInt(0x2F00.toString(16), 16)
 const END_CODE = parseInt(0x2FD5.toString(16), 16)
-const PROPERTY_MARKER = "|"
-const MEANING_PROPERTY = "meaning"
 const NEWLINE_MARKER = "\n"
-const ROOT = document.getElementById("root")
+// |meaning=
+const MEANING_PROPERTY_MARKER = / *\| *meaning *=/
+// [[category_link|text_content]]
+const CATEGORY_LINK_MATCHER = /\[\[(.*)\|(.*)\]\]/
+/**
+ * Removes square brackets [] when above fails due to there being no pipe.
+ * This happens when the category name is the same as the text.
+  */
+const EMPTY_LINK_MATCHER = /[\[\]]/g
+// |key=
+// OR
+// }}
+const ANY_PROPERTY_OR_END_MARKER = /( *\| *\w+ *=|}})/g
 
 function querify(baseUrl, query) {
   const keys = Object.keys(query)
@@ -46,27 +56,41 @@ function parseRadical(radicalNumber, radicalCharacter, json) {
   }
 
   return (textContent => {
-    const keyContent = {
+    const radicalData = {
       "number": radicalNumber,
       "character": radicalCharacter,
       "meaning": undefined,
     }
 
-    if (textContent.indexOf(MEANING_PROPERTY) > -1) {
-      const meaningPropertyMarker = `${PROPERTY_MARKER}${MEANING_PROPERTY}=`
-      const meaningIndex = textContent.indexOf(meaningPropertyMarker)
-      const meaningEnd = textContent.indexOf(PROPERTY_MARKER, meaningIndex + 1)
-      const meaningLine = textContent.substring(meaningIndex, meaningEnd)
-      const meaningLineEnd = meaningLine.indexOf(NEWLINE_MARKER)
-      const meaning =
-        meaningLine
-          .replace(meaningPropertyMarker, "")
-          .replace(NEWLINE_MARKER, "")
-          .substring(0, meaningLineEnd)
-          .trim()
-      keyContent["meaning"] = meaning
+    const allPropertiesOrEndMarkers = textContent.match(ANY_PROPERTY_OR_END_MARKER)
+
+    const meaningPropertyIndex = allPropertiesOrEndMarkers.findIndex(prop => prop.includes("meaning"))
+    if (meaningPropertyIndex === -1) {
+      console.error(`Could not find meaning for radical ${radicalNumber}, property key was missing`)
+      return radicalData
     }
-    return keyContent
+
+    const nextPropertyIndex = meaningPropertyIndex + 1
+    if (!allPropertiesOrEndMarkers[nextPropertyIndex]) {
+      console.error(`Could not find meaning for radical ${radicalNumber}, properties were not formatted as expected`)
+      return radicalData
+    }
+
+    const meaningText = textContent.slice(
+      textContent.indexOf(allPropertiesOrEndMarkers[meaningPropertyIndex]),
+      textContent.indexOf(allPropertiesOrEndMarkers[nextPropertyIndex])
+    )
+
+    radicalData["meaning"] =
+      meaningText
+        .replace(MEANING_PROPERTY_MARKER, "")
+        .replace(NEWLINE_MARKER, "")
+        // Replace links [[link|text]] with text (second capture)
+        .replace(CATEGORY_LINK_MATCHER, "$2")
+        .replaceAll(EMPTY_LINK_MATCHER, "")
+        .trim()
+
+    return radicalData
   })(content)
 }
 
@@ -102,6 +126,7 @@ function main() {
       }
     })
 
+    console.log(`Found ${radicals.length} radicals`, radicals)
     console.log(`Found ${meaninglessRadicals.length} radicals without meanings`, meaninglessRadicals)
     console.log(`Found ${radicalsWithSpecialCharacters.length} radicals with special characters`, radicalsWithSpecialCharacters)
   })
