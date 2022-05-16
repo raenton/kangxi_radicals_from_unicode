@@ -112,25 +112,24 @@ async function fetchRadicals() {
   return await Promise.all(radicalPromises)
 }
 
-function main() {
-  fetchRadicals().then(radicals => {
-    const meaninglessRadicals = []
-    const radicalsWithSpecialCharacters = []
-    radicals.forEach(radical => {
-      if (isEmptyOrFalsy(radical.meaning)) {
-        meaninglessRadicals.push(radical)
-      }
+async function main() {
+  const radicals = await fetchRadicals()
+  const meaninglessRadicals = []
+  const radicalsWithSpecialCharacters = []
+  radicals.forEach(radical => {
+    if (isEmptyOrFalsy(radical.meaning)) {
+      meaninglessRadicals.push(radical)
+    }
 
-      if (hasSpecialCharacters(radical.meaning)) {
-        radicalsWithSpecialCharacters.push(radical)
-      }
-    })
-
-    console.log(`Found ${radicals.length} radicals`, radicals)
-    console.log(`Found ${meaninglessRadicals.length} radicals without meanings`, meaninglessRadicals)
-    console.log(`Found ${radicalsWithSpecialCharacters.length} radicals with special characters`, radicalsWithSpecialCharacters)
+    if (hasSpecialCharacters(radical.meaning)) {
+      radicalsWithSpecialCharacters.push(radical)
+    }
   })
+
+  console.log(`Found ${radicals.length} radicals`, radicals)
+  console.log(`Found ${meaninglessRadicals.length} radicals without meanings`, meaninglessRadicals)
+  console.log(`Found ${radicalsWithSpecialCharacters.length} radicals with special characters`, radicalsWithSpecialCharacters)
 }
 
-main()
+main().then(() => console.log("Done!"))
 
