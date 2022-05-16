@@ -1,5 +1,3 @@
-import fetch from "node-fetch"
-
 const API_BASE = "https://en.wikipedia.org/w/api.php"
 const START_CODE = parseInt(0x2F00.toString(16), 16)
 const END_CODE = parseInt(0x2FD5.toString(16), 16)

@@ -1,9 +1,8 @@
 {
-  "type": "module",
   "scripts": {
-    "start": "node index.js"
+    "start": "node --experimental-fetch index.js"
   },
-  "dependencies": {
-    "node-fetch": "^3.2.4"
+  "engines": {
+    "node": ">=17.5.0"
   }
 }
