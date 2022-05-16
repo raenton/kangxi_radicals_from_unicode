@@ -114,17 +114,8 @@ async function fetchRadicals() {
 
 async function main() {
   const radicals = await fetchRadicals()
-  const meaninglessRadicals = []
-  const radicalsWithSpecialCharacters = []
-  radicals.forEach(radical => {
-    if (isEmptyOrFalsy(radical.meaning)) {
-      meaninglessRadicals.push(radical)
-    }
-
-    if (hasSpecialCharacters(radical.meaning)) {
-      radicalsWithSpecialCharacters.push(radical)
-    }
-  })
+  const meaninglessRadicals = radicals.filter(radical => isEmptyOrFalsy(radical.meaning))
+  const radicalsWithSpecialCharacters = radicals.filter(radical => hasSpecialCharacters(radical.meaning))
 
   console.log(`Found ${radicals.length} radicals`, radicals)
   console.log(`Found ${meaninglessRadicals.length} radicals without meanings`, meaninglessRadicals)
