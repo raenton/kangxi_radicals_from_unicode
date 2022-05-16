@@ -1,8 +1,9 @@
 {
+  "type": "module",
   "scripts": {
-    "serve": "serve"
+    "start": "node index.js"
   },
-  "devDependencies": {
-    "serve": "^13.0.2"
+  "dependencies": {
+    "node-fetch": "^3.2.4"
   }
 }
