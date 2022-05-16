@@ -1,3 +1,5 @@
+const querify = require("./querify")
+
 const API_BASE = "https://en.wikipedia.org/w/api.php"
 const NEWLINE_MARKER = "\n"
 // |meaning=
@@ -17,19 +19,6 @@ const EMPTY_LINK_MATCHER = /[\[\]]/g
 const ANY_PROPERTY_OR_END_MARKER = /( *\| *\w+ *=|}})/g
 const START_CODE = parseInt(0x2F00.toString(16), 16)
 const END_CODE = parseInt(0x2FD5.toString(16), 16)
-
-function querify(baseUrl, query) {
-  const keys = Object.keys(query)
-  const keyCount = keys.length
-  let result = `${baseUrl}?`
-  for (let keyIndex = 0; keyIndex + 1 <= keyCount; keyIndex++) {
-    const isLastKey = keyIndex + 1 === keyCount
-    const keyName = keys[keyIndex]
-    const keyValue = query[keyName]
-    result += (`${keyName}=${keyValue}${isLastKey ? "" : "&"}`)
-  }
-  return result
-}
 
 function fetchRadical(radicalNumber, radicalCharacter) {
   const title = `Radical_${radicalNumber}`
