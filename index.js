@@ -1,6 +1,5 @@
 const { hasSpecialCharacters, isEmptyOrFalsy } = require("./stringUtils")
 const { fetchRadicals } = require("./radicalService")
-const { createDeck, deleteDecks } = require("./ankiService")
 
 async function main() {
   const radicals = await fetchRadicals()
@@ -12,7 +11,4 @@ async function main() {
   console.log(`Found ${radicalsWithSpecialCharacters.length} radicals with special characters`, radicalsWithSpecialCharacters)
 }
 
-// main().then(() => console.log("Done!"))
-
-createDeck("test-1").then(console.log)
-deleteDecks(["test-1"]).then(console.log)
+main().then(() => console.log("Done!"))
