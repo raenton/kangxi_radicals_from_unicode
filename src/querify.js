@@ -1,12 +1,16 @@
-module.exports = function(baseUrl, query) {
+module.exports = function(baseUrl = "", query = {}) {
   const keys = Object.keys(query)
   const keyCount = keys.length
-  let result = `${baseUrl}?`
-  for (let keyIndex = 0; keyIndex + 1 <= keyCount; keyIndex++) {
-    const isLastKey = keyIndex + 1 === keyCount
-    const keyName = keys[keyIndex]
-    const keyValue = query[keyName]
-    result += (`${keyName}=${keyValue}${isLastKey ? "" : "&"}`)
+
+  if (!baseUrl) {
+    return ""
   }
-  return result
+
+  if (keyCount === 0) {
+    return baseUrl
+  }
+
+  return keys.reduce((acc, key, index) => {
+    return acc + (`${key}=${query[key]}${index + 1 === keyCount ? "" : "&"}`)
+  }, baseUrl + "?")
 }
