@@ -1,7 +1,8 @@
 {
   "scripts": {
     "start": "node --experimental-fetch src/index.js",
-    "test": "mocha"
+    "test": "mocha",
+    "test:watch": "mocha -w"
   },
   "engines": {
     "node": ">=17.5.0"
