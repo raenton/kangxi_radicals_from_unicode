@@ -14,5 +14,5 @@ async function main() {
 
 // main().then(() => console.log("Done!"))
 
-createDeck("test-1")
-deleteDecks(["test-1"])
+createDeck("test-1").then(console.log)
+deleteDecks(["test-1"]).then(console.log)
