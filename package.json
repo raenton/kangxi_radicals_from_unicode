@@ -1,8 +1,13 @@
 {
   "scripts": {
-    "start": "node --experimental-fetch index.js"
+    "start": "node --experimental-fetch index.js",
+    "test": "mocha"
   },
   "engines": {
     "node": ">=17.5.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "mocha": "^10.0.0"
   }
 }
