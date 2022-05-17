@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "node --experimental-fetch index.js",
+    "start": "node --experimental-fetch src/index.js",
     "test": "mocha"
   },
   "engines": {
