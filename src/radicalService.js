@@ -1,3 +1,4 @@
+const fs = require("fs")
 const querify = require("./querify")
 
 const API_BASE = "https://en.wikipedia.org/w/api.php"
@@ -94,4 +95,19 @@ exports.fetchRadicals = async function() {
     radicalPromises.push(fetchRadical(position, radicalCharacter))
   }
   return await Promise.all(radicalPromises)
+}
+
+exports.writeRadicalsToCsv = function(radicals) {
+  const writeStream = fs.createWriteStream("./radicals.csv", "utf-8")
+  radicals.forEach((radical) => {
+    const fields = [radical.character, radical.number, `"${radical.meaning}"`]
+    writeStream.write(fields.join(",") + "\n", (error) => {
+      if (error) {
+        console.error("An error occurred while writing to csv: ", error)
+      }
+    })
+  })
+  writeStream.end(() => {
+    console.log("CSV created")
+  })
 }
