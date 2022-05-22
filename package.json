@@ -1,9 +1,14 @@
 {
-  "type": "module",
   "scripts": {
-    "start": "node index.js"
+    "start": "node --experimental-fetch src/index.js",
+    "test": "mocha",
+    "test:watch": "mocha -w"
   },
-  "dependencies": {
-    "node-fetch": "^3.2.4"
+  "engines": {
+    "node": ">=17.5.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "mocha": "^10.0.0"
   }
 }

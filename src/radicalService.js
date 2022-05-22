@@ -1,13 +1,14 @@
-import fetch from "node-fetch"
+const fs = require("fs")
+const querify = require("./querify")
 
 const API_BASE = "https://en.wikipedia.org/w/api.php"
-const START_CODE = parseInt(0x2F00.toString(16), 16)
-const END_CODE = parseInt(0x2FD5.toString(16), 16)
 const NEWLINE_MARKER = "\n"
 // |meaning=
 const MEANING_PROPERTY_MARKER = / *\| *meaning *=/
 // [[category_link|text_content]]
-const CATEGORY_LINK_MATCHER = /\[\[(.*)\|(.*)\]\]/
+// The two last ]] have no escape character because IJ gives a warning.
+// I suppose not needed because the open ['s are escaped.
+const CATEGORY_LINK_MATCHER = /\[\[(.*)\|(.*)]]/
 /**
  * Removes square brackets [] when above fails due to there being no pipe.
  * This happens when the category name is the same as the text.
@@ -17,19 +18,8 @@ const EMPTY_LINK_MATCHER = /[\[\]]/g
 // OR
 // }}
 const ANY_PROPERTY_OR_END_MARKER = /( *\| *\w+ *=|}})/g
-
-function querify(baseUrl, query) {
-  const keys = Object.keys(query)
-  const keyCount = keys.length
-  let result = `${baseUrl}?`
-  for (let keyIndex = 0; keyIndex + 1 <= keyCount; keyIndex++) {
-    const isLastKey = keyIndex + 1 === keyCount
-    const keyName = keys[keyIndex]
-    const keyValue = query[keyName]
-    result += (`${keyName}=${keyValue}${isLastKey ? "" : "&"}`)
-  }
-  return result
-}
+const START_CODE = parseInt(0x2F00.toString(16), 16)
+const END_CODE = parseInt(0x2FD5.toString(16), 16)
 
 function fetchRadical(radicalNumber, radicalCharacter) {
   const title = `Radical_${radicalNumber}`
@@ -49,7 +39,7 @@ function fetchRadical(radicalNumber, radicalCharacter) {
 }
 
 function parseRadical(radicalNumber, radicalCharacter, json) {
-  const missing = json["query"]?.["pages"]?.[0]?.["missing"] == true
+  const missing = json["query"]?.["pages"]?.[0]?.["missing"] === true
   const content = json["query"]?.["pages"]?.[0]?.["revisions"]?.[0]?.["slots"]?.["main"]?.["content"]
 
   if (missing || !content) {
@@ -97,7 +87,7 @@ function parseRadical(radicalNumber, radicalCharacter, json) {
   })(content)
 }
 
-async function fetchRadicals() {
+exports.fetchRadicals = async function() {
   const radicalPromises = []
   for (let currentCode = START_CODE; currentCode <= END_CODE; currentCode++) {
     const position = currentCode - START_CODE + 1
@@ -107,33 +97,17 @@ async function fetchRadicals() {
   return await Promise.all(radicalPromises)
 }
 
-function isEmptyOrFalsy(aString) {
-  return (!aString || aString.length === 0)
-}
-
-function hasSpecialCharacters(aString) {
-  return aString.match(/[^A-Za-z0-9,/() ]/)
-}
-
-function main() {
-  fetchRadicals().then(radicals => {
-    const meaninglessRadicals = []
-    const radicalsWithSpecialCharacters = []
-    radicals.forEach(radical => {
-      if (isEmptyOrFalsy(radical.meaning)) {
-        meaninglessRadicals.push(radical)
-      }
-
-      if (hasSpecialCharacters(radical.meaning)) {
-        radicalsWithSpecialCharacters.push(radical)
+exports.writeRadicalsToCsv = function(radicals) {
+  const writeStream = fs.createWriteStream("./radicals.csv", "utf-8")
+  radicals.forEach((radical) => {
+    const fields = [radical.character, radical.number, `"${radical.meaning}"`]
+    writeStream.write(fields.join(",") + "\n", (error) => {
+      if (error) {
+        console.error("An error occurred while writing to csv: ", error)
       }
     })
-
-    console.log(`Found ${radicals.length} radicals`, radicals)
-    console.log(`Found ${meaninglessRadicals.length} radicals without meanings`, meaninglessRadicals)
-    console.log(`Found ${radicalsWithSpecialCharacters.length} radicals with special characters`, radicalsWithSpecialCharacters)
+  })
+  writeStream.end(() => {
+    console.log("CSV created")
   })
 }
-
-main()
-
